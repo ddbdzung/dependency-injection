@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var _express = /*#__PURE__*/ _interop_require_default(require("express"));
-var _delivermodule = require("./deliver.module");
+var _container = require("./container");
 function _interop_require_default(obj) {
     return obj && obj.__esModule ? obj : {
         default: obj
@@ -15,7 +15,10 @@ app.get("/", function(req, res) {
 });
 app.listen(3006, function() {
     console.log("Server is running on port 3006");
-    _delivermodule.DeliverModule.userDrivingToOffice();
+    var x = _container.container.getDependencyByCtr("DeliverModule");
+    console.log("[DEBUG][DzungDang] container:", _container.container);
+    console.log("[DEBUG][DzungDang] x:", x);
+// x.userDrivingToOffice();
 });
 
 //# sourceMappingURL=index.js.map

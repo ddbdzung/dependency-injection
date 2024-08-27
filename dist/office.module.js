@@ -20,7 +20,7 @@ function _ts_metadata(k, v) {
 }
 var OfficeModule = /*#__PURE__*/ function() {
     "use strict";
-    function OfficeModule(location) {}
+    function OfficeModule(location, employeeQty) {}
     var _proto = OfficeModule.prototype;
     _proto.userArrivedToOffice = function userArrivedToOffice() {
         console.log("User arrived to office");
@@ -31,7 +31,8 @@ OfficeModule = _ts_decorate([
     _container.Injectable,
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
-        String
+        String,
+        Number
     ])
 ], OfficeModule);
 

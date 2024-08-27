@@ -8,7 +8,9 @@ Object.defineProperty(exports, "DeliverModule", {
         return DeliverModule;
     }
 });
+var _usermoduleinterface = require("./user.module.interface");
 var _container = require("./container");
+var _officemodule = require("./office.module");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -18,22 +20,33 @@ function _ts_decorate(decorators, target, key, desc) {
 function _ts_metadata(k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 }
+function _ts_param(paramIndex, decorator) {
+    return function(target, key) {
+        decorator(target, key, paramIndex);
+    };
+}
 var DeliverModule = /*#__PURE__*/ function() {
     "use strict";
-    function DeliverModule() {}
+    function DeliverModule(_officeModule, _userModule) {
+        this._officeModule = _officeModule;
+        this._userModule = _userModule;
+    }
     var _proto = DeliverModule.prototype;
-    // constructor(@Inject() private readonly _officeModule: IOfficeModule) {
-    //   console.log("[DEBUG][DzungDang] _officeModule:", _officeModule);
-    // }
     _proto.userDrivingToOffice = function userDrivingToOffice() {
         console.log("User driving to office");
+        this._officeModule.userArrivedToOffice();
     };
     return DeliverModule;
 }();
 DeliverModule = _ts_decorate([
-    (0, _container.Injectable)(),
+    _container.Injectable,
+    _ts_param(0, _container.Inject),
+    _ts_param(1, _container.Inject),
     _ts_metadata("design:type", Function),
-    _ts_metadata("design:paramtypes", [])
+    _ts_metadata("design:paramtypes", [
+        typeof _officemodule.OfficeModule === "undefined" ? Object : _officemodule.OfficeModule,
+        typeof _usermoduleinterface.IUserModule === "undefined" ? Object : _usermoduleinterface.IUserModule
+    ])
 ], DeliverModule);
 
 //# sourceMappingURL=deliver.module.js.map
