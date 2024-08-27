@@ -1,5 +1,8 @@
+import { InjectionToken } from "./token";
 import { Injectable } from "./container";
 import { IUserModule } from "./user.module.interface";
+
+// export const UserModuleToken = new InjectionToken<IUserModule>("UserModule");
 
 @Injectable
 export class UserModule implements IUserModule {

@@ -10,7 +10,8 @@ Object.defineProperty(exports, "DeliverModule", {
 });
 var _usermoduleinterface = require("./user.module.interface");
 var _container = require("./container");
-var _officemodule = require("./office.module");
+var _officemoduleinterface = require("./office.module.interface");
+var _token = require("./token");
 function _ts_decorate(decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -27,7 +28,8 @@ function _ts_param(paramIndex, decorator) {
 }
 var DeliverModule = /*#__PURE__*/ function() {
     "use strict";
-    function DeliverModule(_officeModule, _userModule) {
+    function DeliverModule(// @Inject private _officeModule: IOfficeModule, // Currently error cause of Object type in runtime instead of implemented class
+    _officeModule, _userModule) {
         this._officeModule = _officeModule;
         this._userModule = _userModule;
     }
@@ -40,11 +42,11 @@ var DeliverModule = /*#__PURE__*/ function() {
 }();
 DeliverModule = _ts_decorate([
     _container.Injectable,
-    _ts_param(0, _container.Inject),
-    _ts_param(1, _container.Inject),
+    _ts_param(0, (0, _container.Inject)(new _token.InjectionToken("OfficeModule"))),
+    _ts_param(1, (0, _container.Inject)(new _token.InjectionToken("UserModule"))),
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
-        typeof _officemodule.OfficeModule === "undefined" ? Object : _officemodule.OfficeModule,
+        typeof _officemoduleinterface.IOfficeModule === "undefined" ? Object : _officemoduleinterface.IOfficeModule,
         typeof _usermoduleinterface.IUserModule === "undefined" ? Object : _usermoduleinterface.IUserModule
     ])
 ], DeliverModule);

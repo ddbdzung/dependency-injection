@@ -23,6 +23,7 @@ require("reflect-metadata");
 var _delivermodule = require("./deliver.module");
 var _officemodule = require("./office.module");
 var _usermodule = require("./user.module");
+var _token = require("./token");
 function _construct(Parent, args, Class) {
     if (_is_native_reflect_construct()) {
         _construct = Reflect.construct;
@@ -73,34 +74,19 @@ function _is_native_reflect_construct() {
     }
 }
 var INJECT_CLASS_METADATA_KEY = "__INJECT_CLASS_METADATA_KEY__";
-function isNotClassConstructor(variable) {
-    // Check if the variable is a function
-    if (typeof variable !== "function") {
-        return true;
-    }
-    // Try to instantiate the function with `new`
-    try {
-        Reflect.construct(String, [], variable);
-    } catch (e) {
-        // If instantiation fails, it's not a class constructor
-        return true;
-    }
-    // If it passes both checks, it is a class constructor
-    return false;
-}
 var DIContainer = /*#__PURE__*/ function() {
     "use strict";
     function DIContainer() {
         this._constructor2Instance = new Map();
     }
     var _proto = DIContainer.prototype;
-    _proto.getDependencyByCtr = function getDependencyByCtr(ctrName) {
-        return this._constructor2Instance.get(ctrName);
+    _proto.getDependencyByCtr = function getDependencyByCtr(injectionToken) {
+        return this._constructor2Instance.get(injectionToken.token);
     };
-    _proto.construct = function construct(ctr) {
+    _proto.construct = function construct(ctr, injectionToken) {
         var _this = this;
-        if (this._constructor2Instance.has(ctr.name)) {
-            return this._constructor2Instance.get(ctr.name);
+        if (this._constructor2Instance.has(injectionToken.token)) {
+            return this._constructor2Instance.get(injectionToken.token);
         }
         // Load the constructor's param types
         var params = Reflect.getMetadata("design:paramtypes", ctr) || [];
@@ -114,10 +100,10 @@ var DIContainer = /*#__PURE__*/ function() {
                 console.log("[DEBUG][DzungDang] param is not injected:", param);
                 return param;
             }
-            return _this.construct(param);
+            return _this.construct(param, injectionToken);
         });
         var instance = _construct(ctr, [].concat(args));
-        this._constructor2Instance.set(ctr.name, instance);
+        this._constructor2Instance.set(injectionToken.token, instance);
         return instance;
     };
     DIContainer.getInstance = function getInstance() {
@@ -137,27 +123,29 @@ var DIContainer = /*#__PURE__*/ function() {
     return DIContainer;
 }();
 var container = DIContainer.getInstance();
-container.construct(_usermodule.UserModule);
-container.construct(_delivermodule.DeliverModule);
-container.construct(_officemodule.OfficeModule);
+container.construct(_usermodule.UserModule, new _token.InjectionToken("UserModule"));
+container.construct(_delivermodule.DeliverModule, new _token.InjectionToken("DeliverModule"));
+container.construct(_officemodule.OfficeModule, new _token.InjectionToken("OfficeModule"));
 function Injectable(target) {
     for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++){
         args[_key - 1] = arguments[_key];
     }
     return target;
 }
-function Inject(target, key, index) {
-    var metadataKey = "__INJECT_CLASS_METADATA_KEY__";
-    // Define metadata to mark the injected constructor parameter
-    var payload = {
-        index: index,
-        sourceConstructor: target
+function Inject(token) {
+    return function(target, key, index) {
+        var metadataKey = "__INJECT_CLASS_METADATA_KEY__";
+        // Define metadata to mark the injected constructor parameter
+        var payload = {
+            index: index,
+            sourceConstructor: target
+        };
+        var firstObj = Reflect.getMetadata("design:paramtypes", target)[0];
+        console.log("[DEBUG][DzungDang] firstObj:", firstObj);
+        var metadataValue = Reflect.getMetadata(metadataKey, target) || [];
+        metadataValue.push(payload);
+        Reflect.defineMetadata(metadataKey, metadataValue, target);
     };
-    var firstObj = Reflect.getMetadata("design:paramtypes", target)[0];
-    console.log("[DEBUG][DzungDang] firstObj:", firstObj);
-    var metadataValue = Reflect.getMetadata(metadataKey, target) || [];
-    metadataValue.push(payload);
-    Reflect.defineMetadata(metadataKey, metadataValue, target);
 }
 
 //# sourceMappingURL=container.js.map
