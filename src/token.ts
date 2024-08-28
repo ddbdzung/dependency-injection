@@ -1,7 +1,9 @@
-export class InjectionToken<T> {
-  private _token: string | symbol | number;
+export type InjectionTokenType = string | symbol | number;
 
-  constructor(token: string | symbol | number) {
+export class InjectionToken {
+  private _token: InjectionTokenType;
+
+  constructor(token: InjectionTokenType) {
     this._token = token;
   }
 

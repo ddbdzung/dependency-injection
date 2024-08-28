@@ -29,15 +29,15 @@ import { InjectionToken } from "./token";
 @Injectable
 export class DeliverModule implements IDeliverModule {
   constructor(
-    // @Inject private _officeModule: IOfficeModule, // Currently error cause of Object type in runtime instead of implemented class
-    @Inject(new InjectionToken<IOfficeModule>("OfficeModule"))
+    @Inject(new InjectionToken("OfficeModule"))
     private _officeModule: IOfficeModule,
-    @Inject(new InjectionToken<IUserModule>("UserModule"))
+    // @Inject(new InjectionToken("UserModule")) // Will throw error because is not injected to constructor of DeliverModule => will be undefined
     private _userModule: IUserModule
   ) {}
 
   userDrivingToOffice(): void {
     console.log("User driving to office");
+    this._userModule.createUser("Dzung Dang");
     this._officeModule.userArrivedToOffice();
   }
 }

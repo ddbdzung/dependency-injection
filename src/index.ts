@@ -14,8 +14,8 @@ app.get("/", (req, res) => {
 
 app.listen(3006, () => {
   console.log("Server is running on port 3006");
-  const deliverModule = container.getDependencyByCtr<IDeliverModule>(
-    new InjectionToken<IDeliverModule>("DeliverModule")
+  const deliverModule = container.getDependencyByToken<IDeliverModule>(
+    new InjectionToken("DeliverModule")
   );
   console.log("[DEBUG][DzungDang] container:", container);
   console.log("[DEBUG][DzungDang] deliverModule:", deliverModule);

@@ -78,10 +78,21 @@ var DIContainer = /*#__PURE__*/ function() {
     "use strict";
     function DIContainer() {
         this._constructor2Instance = new Map();
+        this._tokenMap = new Map();
     }
     var _proto = DIContainer.prototype;
-    _proto.getDependencyByCtr = function getDependencyByCtr(injectionToken) {
+    _proto.getDependencyByToken = function getDependencyByToken(injectionToken) {
         return this._constructor2Instance.get(injectionToken.token);
+    };
+    _proto.bindToClass = function bindToClass(token, ctr) {
+        this._tokenMap.set(token.token, ctr);
+        return this;
+    };
+    _proto.getConstructorByToken = function getConstructorByToken(token) {
+        if (this._tokenMap.has(token.token)) {
+            return this._tokenMap.get(token.token);
+        }
+        throw new Error("Token " + String(token.token) + " not bound");
     };
     _proto.construct = function construct(ctr, injectionToken) {
         var _this = this;
@@ -90,17 +101,23 @@ var DIContainer = /*#__PURE__*/ function() {
         }
         // Load the constructor's param types
         var params = Reflect.getMetadata("design:paramtypes", ctr) || [];
-        var injectedMetadataIndexList = (Reflect.getMetadata("__INJECT_CLASS_METADATA_KEY__", ctr) || []).map(function(i) {
-            return i.index;
-        });
+        var injectedMetadataList = Reflect.getMetadata("__INJECT_CLASS_METADATA_KEY__", ctr) || [];
+        var injectedMetadataKeybyIndex = injectedMetadataList.reduce(function(acc, cur) {
+            acc.set(cur.index, cur);
+            return acc;
+        }, new Map());
         // Inject the dependencies
         var args = params.map(function(param, paramIndex) {
             console.log("[DEBUG][DzungDang] param:", param, paramIndex, ctr.name);
-            if (!injectedMetadataIndexList.includes(paramIndex)) {
+            if (!injectedMetadataKeybyIndex.has(paramIndex)) {
                 console.log("[DEBUG][DzungDang] param is not injected:", param);
+                // TODO: Handle case when param is not injected and is type of Class
+                console.log("[DEBUG][DzungDang] ---param:", param == null ? void 0 : param.name);
                 return param;
             }
-            return _this.construct(param, injectionToken);
+            var _$injectionToken = injectedMetadataKeybyIndex.get(paramIndex).token;
+            var ctrByToken = _this.getConstructorByToken(_$injectionToken);
+            return _this.construct(ctrByToken, _$injectionToken);
         });
         var instance = _construct(ctr, [].concat(args));
         this._constructor2Instance.set(injectionToken.token, instance);
@@ -114,6 +131,12 @@ var DIContainer = /*#__PURE__*/ function() {
     };
     _create_class(DIContainer, [
         {
+            key: "tokenMap",
+            get: function get() {
+                return this._tokenMap;
+            }
+        },
+        {
             key: "constructor2Instance",
             get: function get() {
                 return this._constructor2Instance;
@@ -123,9 +146,17 @@ var DIContainer = /*#__PURE__*/ function() {
     return DIContainer;
 }();
 var container = DIContainer.getInstance();
-container.construct(_usermodule.UserModule, new _token.InjectionToken("UserModule"));
-container.construct(_delivermodule.DeliverModule, new _token.InjectionToken("DeliverModule"));
-container.construct(_officemodule.OfficeModule, new _token.InjectionToken("OfficeModule"));
+console.log("[DEBUG][DzungDang] me fukin in here:");
+var userModuleToken = new _token.InjectionToken("UserModule");
+var deliverModuleToken = new _token.InjectionToken("DeliverModule");
+var officeModuleToken = new _token.InjectionToken("OfficeModule");
+container.bindToClass(userModuleToken, _usermodule.UserModule);
+container.bindToClass(deliverModuleToken, _delivermodule.DeliverModule);
+container.bindToClass(officeModuleToken, _officemodule.OfficeModule);
+console.log("[DEBUG][DzungDang] and u suck with DI Container here:", container);
+container.construct(_usermodule.UserModule, userModuleToken);
+container.construct(_delivermodule.DeliverModule, deliverModuleToken);
+container.construct(_officemodule.OfficeModule, officeModuleToken);
 function Injectable(target) {
     for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++){
         args[_key - 1] = arguments[_key];
@@ -138,10 +169,9 @@ function Inject(token) {
         // Define metadata to mark the injected constructor parameter
         var payload = {
             index: index,
+            token: token,
             sourceConstructor: target
         };
-        var firstObj = Reflect.getMetadata("design:paramtypes", target)[0];
-        console.log("[DEBUG][DzungDang] firstObj:", firstObj);
         var metadataValue = Reflect.getMetadata(metadataKey, target) || [];
         metadataValue.push(payload);
         Reflect.defineMetadata(metadataKey, metadataValue, target);

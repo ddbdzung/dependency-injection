@@ -8,7 +8,7 @@ import { IOfficeModule } from "office.module.interface";
 
 @Injectable
 export class OfficeModule implements IOfficeModule {
-  constructor(location?: string, employeeQty?: number) {}
+  constructor(location?: string, employeeQty?: null | undefined) {}
 
   public userArrivedToOffice(): void {
     console.log("User arrived to office");

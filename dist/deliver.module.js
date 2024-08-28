@@ -28,14 +28,15 @@ function _ts_param(paramIndex, decorator) {
 }
 var DeliverModule = /*#__PURE__*/ function() {
     "use strict";
-    function DeliverModule(// @Inject private _officeModule: IOfficeModule, // Currently error cause of Object type in runtime instead of implemented class
-    _officeModule, _userModule) {
+    function DeliverModule(_officeModule, // @Inject(new InjectionToken("UserModule")) // Will throw error because is not injected to constructor of DeliverModule => will be undefined
+    _userModule) {
         this._officeModule = _officeModule;
         this._userModule = _userModule;
     }
     var _proto = DeliverModule.prototype;
     _proto.userDrivingToOffice = function userDrivingToOffice() {
         console.log("User driving to office");
+        this._userModule.createUser("Dzung Dang");
         this._officeModule.userArrivedToOffice();
     };
     return DeliverModule;
@@ -43,7 +44,6 @@ var DeliverModule = /*#__PURE__*/ function() {
 DeliverModule = _ts_decorate([
     _container.Injectable,
     _ts_param(0, (0, _container.Inject)(new _token.InjectionToken("OfficeModule"))),
-    _ts_param(1, (0, _container.Inject)(new _token.InjectionToken("UserModule"))),
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
         typeof _officemoduleinterface.IOfficeModule === "undefined" ? Object : _officemoduleinterface.IOfficeModule,
