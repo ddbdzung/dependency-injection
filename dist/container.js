@@ -112,7 +112,6 @@ var DIContainer = /*#__PURE__*/ function() {
             if (!injectedMetadataKeybyIndex.has(paramIndex)) {
                 console.log("[DEBUG][DzungDang] param is not injected:", param);
                 // TODO: Handle case when param is not injected and is type of Class
-                console.log("[DEBUG][DzungDang] ---param:", param == null ? void 0 : param.name);
                 return param;
             }
             var _$injectionToken = injectedMetadataKeybyIndex.get(paramIndex).token;
@@ -158,9 +157,6 @@ container.construct(_usermodule.UserModule, userModuleToken);
 container.construct(_delivermodule.DeliverModule, deliverModuleToken);
 container.construct(_officemodule.OfficeModule, officeModuleToken);
 function Injectable(target) {
-    for(var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++){
-        args[_key - 1] = arguments[_key];
-    }
     return target;
 }
 function Inject(token) {

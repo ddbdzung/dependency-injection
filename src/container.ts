@@ -82,8 +82,6 @@ class DIContainer {
         console.log("[DEBUG][DzungDang] param is not injected:", param);
 
         // TODO: Handle case when param is not injected and is type of Class
-
-        console.log("[DEBUG][DzungDang] ---param:", param?.name);
         return param;
       }
 
@@ -119,7 +117,7 @@ container.construct<IUserModule>(UserModule, userModuleToken);
 container.construct<IDeliverModule>(DeliverModule, deliverModuleToken);
 container.construct<IOfficeModule>(OfficeModule, officeModuleToken);
 
-export function Injectable(target: Ctr, ...args: any[]) {
+export function Injectable(target: Ctr) {
   return target;
 }
 

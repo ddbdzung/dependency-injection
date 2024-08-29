@@ -31,7 +31,7 @@ export class DeliverModule implements IDeliverModule {
   constructor(
     @Inject(new InjectionToken("OfficeModule"))
     private _officeModule: IOfficeModule,
-    // @Inject(new InjectionToken("UserModule")) // Will throw error because is not injected to constructor of DeliverModule => will be undefined
+    @Inject(new InjectionToken("UserModule"))
     private _userModule: IUserModule
   ) {}
 

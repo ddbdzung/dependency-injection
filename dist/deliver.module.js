@@ -28,8 +28,7 @@ function _ts_param(paramIndex, decorator) {
 }
 var DeliverModule = /*#__PURE__*/ function() {
     "use strict";
-    function DeliverModule(_officeModule, // @Inject(new InjectionToken("UserModule")) // Will throw error because is not injected to constructor of DeliverModule => will be undefined
-    _userModule) {
+    function DeliverModule(_officeModule, _userModule) {
         this._officeModule = _officeModule;
         this._userModule = _userModule;
     }
@@ -44,6 +43,7 @@ var DeliverModule = /*#__PURE__*/ function() {
 DeliverModule = _ts_decorate([
     _container.Injectable,
     _ts_param(0, (0, _container.Inject)(new _token.InjectionToken("OfficeModule"))),
+    _ts_param(1, (0, _container.Inject)(new _token.InjectionToken("UserModule"))),
     _ts_metadata("design:type", Function),
     _ts_metadata("design:paramtypes", [
         typeof _officemoduleinterface.IOfficeModule === "undefined" ? Object : _officemoduleinterface.IOfficeModule,
