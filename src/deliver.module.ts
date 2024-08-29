@@ -1,10 +1,12 @@
 import { IUserModule } from "./user.module.interface";
-import { Inject, Injectable } from "./container";
-import { IDeliverModule } from "./deliver.module.interface";
-import { IOfficeModule } from "./office.module.interface";
-import { UserModule } from "./user.module";
-import { OfficeModule } from "./office.module";
+import type { IDeliverModule } from "./deliver.module.interface";
+import type { IOfficeModule } from "./office.module.interface";
+
 import { InjectionToken } from "./token";
+import { Inject, Injectable } from "./decorator";
+import { userModuleToken } from "./user.module";
+import { officeModuleToken } from "./office.module";
+import { forwardRef } from "./utility";
 
 // Not following the Single Responsibility Principle
 // Not willing to change the UserModule and OfficeModule classes because they are used in other parts of the application
@@ -22,17 +24,14 @@ import { InjectionToken } from "./token";
 //   }
 // }
 
-// export const DeliverModuleToken = new InjectionToken<IDeliverModule>(
-//   "DeliverModule"
-// );
-
+// TODO: Convert to optional token string (as long as it is unique value)
 @Injectable
 export class DeliverModule implements IDeliverModule {
   constructor(
-    @Inject(new InjectionToken("OfficeModule"))
-    private _officeModule: IOfficeModule,
-    @Inject(new InjectionToken("UserModule"))
-    private _userModule: IUserModule
+    @Inject(forwardRef(() => userModuleToken))
+    private _userModule: IUserModule,
+    @Inject(officeModuleToken)
+    private _officeModule: IOfficeModule
   ) {}
 
   userDrivingToOffice(): void {
@@ -41,3 +40,7 @@ export class DeliverModule implements IDeliverModule {
     this._officeModule.userArrivedToOffice();
   }
 }
+
+export const deliverModuleToken = new InjectionToken("DeliverModule").bindTo(
+  DeliverModule
+);

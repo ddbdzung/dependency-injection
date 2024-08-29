@@ -1,20 +1,24 @@
-import "reflect-metadata";
+import { uid } from "uid/secure";
 
-const INJECT_CLASS_METADATA_KEY = "__INJECT_CLASS_METADATA_KEY__";
-
-export type Ctr<T = any> = new (...args: any[]) => T;
+import type { IUserModule } from "./user.module.interface";
+import type { IDeliverModule } from "./deliver.module.interface";
+import type { IOfficeModule } from "./office.module.interface";
 
 import { DeliverModule } from "./deliver.module";
 import { OfficeModule } from "./office.module";
-import { IUserModule } from "./user.module.interface";
-import { IDeliverModule } from "./deliver.module.interface";
-import { IOfficeModule } from "./office.module.interface";
 import { UserModule } from "./user.module";
 import { InjectionToken } from "./token";
+import { getCentralizedStorage } from "./initial-module";
+import {
+  IPayloadInjector,
+  IPayloadInjectorWithoutForwardRef,
+} from "./decorator";
+
+export const INJECT_CLASS_METADATA_KEY = "__INJECT_CLASS_METADATA_KEY__";
+export const CONSTRUCTOR_PARAM_METADATA_KEY = "design:paramtypes";
 
 class DIContainer {
   private _constructor2Instance: Map<InjectionToken["token"], any> = new Map();
-  private _tokenMap: Map<InjectionToken["token"], Ctr<any>> = new Map();
 
   private static _instance: DIContainer;
 
@@ -34,68 +38,70 @@ class DIContainer {
     return this._constructor2Instance.get(injectionToken.token);
   }
 
-  public bindToClass<T>(token: InjectionToken, ctr: Ctr): this {
-    this._tokenMap.set(token.token, ctr);
-    return this;
-  }
-
-  public get tokenMap() {
-    return this._tokenMap;
-  }
-
-  public getConstructorByToken(token: InjectionToken): Ctr {
-    if (this._tokenMap.has(token.token)) {
-      return this._tokenMap.get(token.token) as Ctr;
-    }
-
-    throw new Error(`Token ${String(token.token)} not bound`);
-  }
-
   public construct<T>(ctr: Ctr, injectionToken: InjectionToken): T {
+    // Check if the instance is already created, return it
     if (this._constructor2Instance.has(injectionToken.token)) {
       return this._constructor2Instance.get(injectionToken.token);
     }
 
     // Load the constructor's param types
-    const params = Reflect.getMetadata("design:paramtypes", ctr) || [];
+    const params =
+      Reflect.getMetadata(CONSTRUCTOR_PARAM_METADATA_KEY, ctr) || [];
 
+    // Load injected metadata list (including forwardRef token and plain token)
     const injectedMetadataList =
       (Reflect.getMetadata(
-        "__INJECT_CLASS_METADATA_KEY__",
+        INJECT_CLASS_METADATA_KEY,
         ctr
-      ) as IPayload[]) || [];
+      ) as IPayloadInjector[]) || [];
 
-    const injectedMetadataKeybyIndex = injectedMetadataList.reduce(
-      (acc, cur) => {
-        acc.set(cur.index, cur);
+    const injectedMetadataDict = injectedMetadataList.reduce((acc, cur) => {
+      acc.set(cur.index, cur);
 
-        return acc;
-      },
-      new Map<number, IPayload>()
-    );
+      return acc;
+    }, new Map<number, IPayloadInjector>());
 
     // Inject the dependencies
     const args = params.map((param: unknown, paramIndex: number) => {
-      console.log("[DEBUG][DzungDang] param:", param, paramIndex, ctr.name);
-
-      if (!injectedMetadataKeybyIndex.has(paramIndex)) {
-        console.log("[DEBUG][DzungDang] param is not injected:", param);
-
-        // TODO: Handle case when param is not injected and is type of Class
+      // If the param is not injected, return it
+      if (!injectedMetadataDict.has(paramIndex)) {
         return param;
       }
 
-      const injectionToken = (
-        injectedMetadataKeybyIndex.get(paramIndex) as IPayload
-      ).token;
+      const injector = injectedMetadataDict.get(paramIndex) as IPayloadInjector;
+      const { token, injected } = injector;
+      if (!token) {
+        throw new Error(
+          `Injection token is not found for ${paramIndex} in ${ctr.name}`
+        );
+      }
 
-      const ctrByToken = this.getConstructorByToken(injectionToken);
+      // If param is a class and already injected, return the instance
+      if (injected) {
+        return this.getDependencyByToken(token as InjectionToken);
+      }
 
-      return this.construct<T>(ctrByToken, injectionToken);
+      const tokenOfInjector = token instanceof InjectionToken ? token : token();
+
+      injector.injected = true;
+      injector.token = tokenOfInjector;
+
+      // COnvert from Map to Array of Object
+      const newMetadataValue = Array.from(injectedMetadataDict.values());
+
+      Reflect.defineMetadata(
+        "__INJECT_CLASS_METADATA_KEY__",
+        newMetadataValue,
+        ctr
+      );
+
+      const ctrByToken = tokenOfInjector.boundTarget;
+      return this.construct<T>(ctrByToken, tokenOfInjector);
     });
 
     const instance = new ctr(...args);
     this._constructor2Instance.set(injectionToken.token, instance);
+
     return instance;
   }
 
@@ -105,49 +111,5 @@ class DIContainer {
 }
 
 const container = DIContainer.getInstance();
-console.log("[DEBUG][DzungDang] me fukin in here:");
-const userModuleToken = new InjectionToken("UserModule");
-const deliverModuleToken = new InjectionToken("DeliverModule");
-const officeModuleToken = new InjectionToken("OfficeModule");
-container.bindToClass(userModuleToken, UserModule);
-container.bindToClass(deliverModuleToken, DeliverModule);
-container.bindToClass(officeModuleToken, OfficeModule);
-console.log("[DEBUG][DzungDang] and u suck with DI Container here:", container);
-container.construct<IUserModule>(UserModule, userModuleToken);
-container.construct<IDeliverModule>(DeliverModule, deliverModuleToken);
-container.construct<IOfficeModule>(OfficeModule, officeModuleToken);
-
-export function Injectable(target: Ctr) {
-  return target;
-}
-
-export interface IPayload {
-  index: number;
-  token: InjectionToken;
-  sourceConstructor: Ctr;
-}
-
-/**
- * inject decorator to module to class constructor
- * @param target Target class
- * @param key Possible undefined cause it's parameter of constructor
- * @param index Indexing order of parameter in constructor
- */
-export function Inject(token: InjectionToken) {
-  return (target: any, key: string | undefined, index: number) => {
-    const metadataKey = "__INJECT_CLASS_METADATA_KEY__";
-    // Define metadata to mark the injected constructor parameter
-    const payload: IPayload = {
-      index,
-      token,
-      sourceConstructor: target,
-    };
-
-    const metadataValue = Reflect.getMetadata(metadataKey, target) || [];
-    metadataValue.push(payload);
-
-    Reflect.defineMetadata(metadataKey, metadataValue, target);
-  };
-}
 
 export { container };

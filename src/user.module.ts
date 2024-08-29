@@ -1,14 +1,19 @@
-import { InjectionToken } from "./token";
-import { Injectable } from "./container";
-import { IUserModule } from "./user.module.interface";
+import type { IDeliverModule } from "./deliver.module.interface";
+import type { IUserModule } from "./user.module.interface";
 
-// export const UserModuleToken = new InjectionToken<IUserModule>("UserModule");
+import { Inject, Injectable } from "./decorator";
+import { InjectionToken } from "./token";
+import { deliverModuleToken } from "./deliver.module";
+import { forwardRef } from "./utility";
 
 @Injectable
 export class UserModule implements IUserModule {
   private _fullName: string;
 
-  constructor() {}
+  constructor(
+    @Inject(forwardRef(() => deliverModuleToken))
+    _deliverModule: IDeliverModule
+  ) {}
 
   get fullName(): string {
     return this._fullName;
@@ -19,3 +24,7 @@ export class UserModule implements IUserModule {
     return this;
   }
 }
+
+export const userModuleToken = new InjectionToken("UserModule").bindTo(
+  UserModule
+);

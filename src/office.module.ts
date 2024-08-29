@@ -1,10 +1,7 @@
-import { InjectionToken } from "./token";
-import { Injectable } from "./container";
-import { IOfficeModule } from "office.module.interface";
+import type { IOfficeModule } from "./office.module.interface";
 
-// export const OfficeModuleToken = new InjectionToken<IOfficeModule>(
-//   "OfficeModule"
-// );
+import { Injectable } from "./decorator";
+import { InjectionToken } from "./token";
 
 @Injectable
 export class OfficeModule implements IOfficeModule {
@@ -14,3 +11,7 @@ export class OfficeModule implements IOfficeModule {
     console.log("User arrived to office");
   }
 }
+
+export const officeModuleToken = new InjectionToken("OfficeModule").bindTo(
+  OfficeModule
+);
