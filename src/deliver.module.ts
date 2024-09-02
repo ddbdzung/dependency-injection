@@ -2,7 +2,7 @@ import { IUserModule } from "./user.module.interface";
 import type { IDeliverModule } from "./deliver.module.interface";
 import type { IOfficeModule } from "./office.module.interface";
 
-import { InjectionToken } from "./token";
+import { InjectionToken, METADATA_TOKEN_KEY } from "./token";
 import { Inject, Injectable } from "./decorator";
 import { userModuleToken } from "./user.module";
 import { officeModuleToken } from "./office.module";
@@ -41,6 +41,4 @@ export class DeliverModule implements IDeliverModule {
   }
 }
 
-export const deliverModuleToken = new InjectionToken("DeliverModule").bindTo(
-  DeliverModule
-);
+export const deliverModuleToken = new InjectionToken(DeliverModule);

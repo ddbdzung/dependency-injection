@@ -25,6 +25,4 @@ export class UserModule implements IUserModule {
   }
 }
 
-export const userModuleToken = new InjectionToken("UserModule").bindTo(
-  UserModule
-);
+export const userModuleToken = new InjectionToken(UserModule);

@@ -12,6 +12,4 @@ export class OfficeModule implements IOfficeModule {
   }
 }
 
-export const officeModuleToken = new InjectionToken("OfficeModule").bindTo(
-  OfficeModule
-);
+export const officeModuleToken = new InjectionToken(OfficeModule);

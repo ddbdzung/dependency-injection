@@ -43,24 +43,12 @@ export class InjectionToken {
     return createHash("sha256").update(`${id}_${name}`).digest("hex");
   }
 
-  public hasBoundTarget() {
-    return !!this._boundTarget;
-  }
-
   public get boundTarget() {
     return this._boundTarget;
   }
 
   public bindTo(target: Ctr) {
-    const currentMetadataKeys = Reflect.getOwnMetadataKeys(target);
-
-    if (currentMetadataKeys.includes(METADATA_TOKEN_KEY)) {
-      return this;
-    }
-
     this._boundTarget = target;
-    Reflect.defineMetadata(METADATA_TOKEN_KEY, this, target);
-
     return this;
   }
 }
