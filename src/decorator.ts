@@ -21,11 +21,6 @@ export interface IPayloadInjector {
   injected: boolean;
 }
 
-export interface IPayloadInjectorWithoutForwardRef
-  extends Omit<IPayloadInjector, "token"> {
-  token: InjectionToken;
-}
-
 /**
  * inject decorator to module to class constructor
  * @param target Target class

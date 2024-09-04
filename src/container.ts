@@ -1,18 +1,7 @@
 import { uid } from "uid/secure";
 
-import type { IUserModule } from "./user.module.interface";
-import type { IDeliverModule } from "./deliver.module.interface";
-import type { IOfficeModule } from "./office.module.interface";
-
-import { DeliverModule } from "./deliver.module";
-import { OfficeModule } from "./office.module";
-import { UserModule } from "./user.module";
 import { InjectionToken } from "./token";
-import { getCentralizedStorage } from "./initial-module";
-import {
-  IPayloadInjector,
-  IPayloadInjectorWithoutForwardRef,
-} from "./decorator";
+import { IPayloadInjector } from "./decorator";
 
 export const INJECT_CLASS_METADATA_KEY = "__INJECT_CLASS_METADATA_KEY__";
 export const CONSTRUCTOR_PARAM_METADATA_KEY = "design:paramtypes";
@@ -89,11 +78,7 @@ class DIContainer {
       // COnvert from Map to Array of Object
       const newMetadataValue = Array.from(injectedMetadataDict.values());
 
-      Reflect.defineMetadata(
-        "__INJECT_CLASS_METADATA_KEY__",
-        newMetadataValue,
-        ctr
-      );
+      Reflect.defineMetadata(INJECT_CLASS_METADATA_KEY, newMetadataValue, ctr);
 
       const ctrByToken = tokenOfInjector.boundTarget;
       return this.construct<T>(ctrByToken, tokenOfInjector);
